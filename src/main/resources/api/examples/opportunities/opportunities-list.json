@@ -1,0 +1,14 @@
+[
+  {
+    "id": "0061k00000Hh7eAAJ",
+    "name": "Oportunidad de Ejemplo",
+    "amount": 5000,
+    "stage": "Prospecting"
+  },
+  {
+    "id": "0061k00000Hh8bBBJ",
+    "name": "Oportunidad de Venta",
+    "amount": 15000,
+    "stage": "Negotiation"
+  }
+]

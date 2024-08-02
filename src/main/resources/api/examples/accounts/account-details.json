@@ -1,0 +1,12 @@
+{
+  "id": "0011k00000Hh7eAAJ",
+  "name": "Cuenta de Ejemplo",
+  "industry": "Tecnología",
+  "billingAddress": {
+    "street": "1234 Elm St",
+    "city": "Springfield",
+    "state": "IL",
+    "postalCode": "62701",
+    "country": "USA"
+  }
+}

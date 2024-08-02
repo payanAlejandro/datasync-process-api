@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+		<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="c268f452-1364-415b-8105-5597a74b93c8" file="${env}.properties" key="${key}"/>
+	
+	
+		<global-property doc:name="Global Property" doc:id="8379c640-6eed-4cc9-afc4-cb9a2b3a715b" name="env" value="staging" />
+	<configuration-properties doc:name="Configuration properties" doc:id="daa33059-f6b7-4300-a131-825e5f848e7c" file="${env}.properties" />
+	<global-property doc:name="Global Property" doc:id="9f9071bc-a3d1-4a42-83f4-8eb26d6e44e2" name="key" value="pmtMa3n0yGsH0u3e" />
+	
+    <http:request-config name="HTTP_Request_Salesforce" basePath="/api" doc:name="HTTP Request Salesforce">
+        <http:request-connection host="sf-connection-system-api.us-e2.cloudhub.io" protocol="HTTPS"/>
+    </http:request-config>
+
+    <http:request-config name="HTTP_Request_Database" basePath="/api"  doc:name="HTTP Request Database">
+        <http:request-connection host="db-connect-system-api.us-e2.cloudhub.io" protocol="HTTPS"/>
+    </http:request-config>
+	
+	
+	<http:listener-config name="datasync-process-api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="${https.port}" protocol="HTTPS">
+			<tls:context >
+				<tls:key-store type="jks" path="${jks.path}" alias="${jks.alias}" keyPassword="${secure::jks.password}" password="${secure::jks.password}" />
+			</tls:context>
+		</http:listener-connection>
+    </http:listener-config>
+    
+    <apikit:config name="datasync-process-api-config" api="datasync-process-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" >
+		<apikit:flow-mappings >
+			<apikit:flow-mapping resource="/accounts" action="post" content-type="application/json" flow-ref="post:\accounts:application\json:datasync-process-api-config" />
+			<apikit:flow-mapping resource="/contacts" action="post" content-type="application/json" flow-ref="post:\contacts:application\json:datasync-process-api-config" />
+			<apikit:flow-mapping resource="/opportunities" action="post" content-type="application/json" flow-ref="post:\opportunities:application\json:datasync-process-api-config" />
+			<apikit:flow-mapping resource="/customobject" action="post" content-type="application/json" flow-ref="post:\customobject:application\json:datasync-process-api-config" />
+		</apikit:flow-mappings>
+	</apikit:config>
+	
+	</mule>

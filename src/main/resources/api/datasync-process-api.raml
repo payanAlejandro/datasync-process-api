@@ -1,0 +1,331 @@
+#%RAML 1.0
+title: Process API
+description: API para procesar y sincronizar datos entre Salesforce y un sitio web hacia una base de datos PostgreSQL, asegurando la seguridad y fidelidad de los datos.
+version: v1
+baseUri: https://{host}:{port}/apiProcess
+
+mediaType: application/json
+
+types:
+  DataRequest:
+    type: object
+    properties:
+      source: string
+      data: object
+  DataResponse:
+    type: object
+    properties:
+      status: string
+      message: string
+
+/accounts:
+  get:
+    description: Obtiene todas las cuentas desde Salesforce y PostgreSQL.
+    responses:
+      200:
+        description: Lista de todas las cuentas.
+        body:
+          application/json:
+            example: !include examples/accounts/accounts-list.json
+
+  post:
+    description: Crea una nueva cuenta en Salesforce y PostgreSQL.
+    body:
+      application/json:
+        example:
+          source: "webapp"
+          data:
+            name: "Nueva Cuenta"
+            industry: "Tecnología"
+    responses:
+      201:
+        description: Cuenta creada exitosamente.
+        body:
+          application/json:
+            type: DataResponse
+            example:
+              status: "created"
+              message: "La cuenta ha sido creada exitosamente."
+
+  /{accountId}:
+    uriParameters:
+      accountId:
+        type: string
+        description: ID de la cuenta.
+    get:
+      description: Obtiene detalles de una cuenta por ID desde Salesforce y PostgreSQL.
+      responses:
+        200:
+          description: Detalles de la cuenta.
+          body:
+            application/json:
+              example: !include examples/accounts/account-details.json
+
+    put:
+      description: Modifica una cuenta existente en Salesforce y PostgreSQL.
+      body:
+        application/json:
+          type: DataRequest
+          example:
+            source: "salesforce"
+            data:
+              name: "Cuenta Actualizada"
+              industry: "Finanzas"
+      responses:
+        200:
+          description: Cuenta actualizada exitosamente.
+          body:
+            application/json:
+              type: DataResponse
+              example:
+                status: "updated"
+                message: "La cuenta ha sido actualizada exitosamente."
+
+    delete:
+      description: Elimina una cuenta existente en Salesforce y PostgreSQL.
+      responses:
+        204:
+          description: Cuenta eliminada exitosamente.
+        404:
+          description: Cuenta no encontrada.
+          body:
+            application/json:
+              type: DataResponse
+              example:
+                status: "error"
+                message: "Cuenta no encontrada."
+
+/contacts:
+  get:
+    description: Obtiene todos los contactos desde Salesforce y PostgreSQL.
+    responses:
+      200:
+        description: Lista de todos los contactos.
+        body:
+          application/json:
+            example: !include examples/contacts/contacts-list.json
+
+  post:
+    description: Crea un nuevo contacto en Salesforce y PostgreSQL.
+    body:
+      application/json:
+        example:
+          source: "webapp"
+          data:
+            firstName: "Juan"
+            lastName: "Pérez"
+            email: "juan.perez@example.com"
+    responses:
+      201:
+        description: Contacto creado exitosamente.
+        body:
+          application/json:
+            type: DataResponse
+            example:
+              status: "created"
+              message: "El contacto ha sido creado exitosamente."
+
+  /{contactId}:
+    uriParameters:
+      contactId:
+        type: string
+        description: ID del contacto.
+    get:
+      description: Obtiene detalles de un contacto por ID desde Salesforce y PostgreSQL.
+      responses:
+        200:
+          description: Detalles del contacto.
+          body:
+            application/json:
+              example: !include examples/contacts/contact-details.json
+
+    put:
+      description: Modifica un contacto existente en Salesforce y PostgreSQL.
+      body:
+        application/json:
+          type: DataRequest
+          example:
+            source: "salesforce"
+            data:
+              firstName: "Juan"
+              lastName: "Pérez"
+              email: "juan.perez@nuevoemail.com"
+      responses:
+        200:
+          description: Contacto actualizado exitosamente.
+          body:
+            application/json:
+              type: DataResponse
+              example:
+                status: "updated"
+                message: "El contacto ha sido actualizado exitosamente."
+
+    delete:
+      description: Elimina un contacto existente en Salesforce y PostgreSQL.
+      responses:
+        204:
+          description: Contacto eliminado exitosamente.
+        404:
+          description: Contacto no encontrado.
+          body:
+            application/json:
+              type: DataResponse
+              example:
+                status: "error"
+                message: "Contacto no encontrado."
+
+/opportunities:
+  get:
+    description: Obtiene todas las oportunidades desde Salesforce y PostgreSQL.
+    responses:
+      200:
+        description: Lista de todas las oportunidades.
+        body:
+          application/json:
+            example: !include examples/opportunities/opportunities-list.json
+
+  post:
+    description: Crea una nueva oportunidad en Salesforce y PostgreSQL.
+    body:
+      application/json:
+        example:
+          source: "webapp"
+          data:
+            name: "Nueva Oportunidad"
+            amount: 10000
+            stage: "Prospecting"
+    responses:
+      201:
+        description: Oportunidad creada exitosamente.
+        body:
+          application/json:
+            type: DataResponse
+            example:
+              status: "created"
+              message: "La oportunidad ha sido creada exitosamente."
+
+  /{opportunityId}:
+    uriParameters:
+      opportunityId:
+        type: string
+        description: ID de la oportunidad.
+    get:
+      description: Obtiene detalles de una oportunidad por ID desde Salesforce y PostgreSQL.
+      responses:
+        200:
+          description: Detalles de la oportunidad.
+          body:
+            application/json:
+              example: !include examples/opportunities/opportunity-details.json
+
+    put:
+      description: Modifica una oportunidad existente en Salesforce y PostgreSQL.
+      body:
+        application/json:
+          type: DataRequest
+          example:
+            source: "salesforce"
+            data:
+              name: "Oportunidad Actualizada"
+              amount: 15000
+              stage: "Negotiation"
+      responses:
+        200:
+          description: Oportunidad actualizada exitosamente.
+          body:
+            application/json:
+              type: DataResponse
+              example:
+                status: "updated"
+                message: "La oportunidad ha sido actualizada exitosamente."
+
+    delete:
+      description: Elimina una oportunidad existente en Salesforce y PostgreSQL.
+      responses:
+        204:
+          description: Oportunidad eliminada exitosamente.
+        404:
+          description: Oportunidad no encontrada.
+          body:
+            application/json:
+              type: DataResponse
+              example:
+                status: "error"
+                message: "Oportunidad no encontrada."
+
+/customobject:
+  get:
+    description: Obtiene todos los objetos personalizados desde Salesforce y PostgreSQL.
+    responses:
+      200:
+        description: Lista de todos los objetos personalizados.
+        body:
+          application/json:
+            example: !include examples/customObject/customobject-list.json
+
+  post:
+    description: Crea un nuevo objeto personalizado en Salesforce y PostgreSQL.
+    body:
+      application/json:
+        example:
+          source: "webapp"
+          data:
+            customField1: "Valor"
+            customField2: "Otro Valor"
+    responses:
+      201:
+        description: Objeto personalizado creado exitosamente.
+        body:
+          application/json:
+            type: DataResponse
+            example:
+              status: "created"
+              message: "El objeto personalizado ha sido creado exitosamente."
+
+  /{customObjectId}:
+    uriParameters:
+      customObjectId:
+        type: string
+        description: ID del objeto personalizado.
+    get:
+      description: Obtiene detalles de un objeto personalizado por ID desde Salesforce y PostgreSQL.
+      responses:
+        200:
+          description: Detalles del objeto personalizado.
+          body:
+            application/json:
+              example: !include examples/customObject/customobject-details.json
+
+    put:
+      description: Modifica un objeto personalizado existente en Salesforce y PostgreSQL.
+      body:
+        application/json:
+          type: DataRequest
+          example:
+            source: "salesforce"
+            data:
+              customField1: "Nuevo Valor"
+              customField2: "Otro Nuevo Valor"
+      responses:
+        200:
+          description: Objeto personalizado actualizado exitosamente.
+          body:
+            application/json:
+              type: DataResponse
+              example:
+                status: "updated"
+                message: "El objeto personalizado ha sido actualizado exitosamente."
+
+    delete:
+      description: Elimina un objeto personalizado existente en Salesforce y PostgreSQL.
+      responses:
+        204:
+          description: Objeto personalizado eliminado exitosamente.
+        404:
+          description: Objeto personalizado no encontrado.
+          body:
+            application/json:
+              type: DataResponse
+              example:
+                status: "error"
+                message: "Objeto personalizado no encontrado."

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+
+    <flow name="datasync-process-api-main">
+        <http:listener config-ref="datasync-process-api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+        </http:listener>
+        <apikit:router config-ref="datasync-process-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+
+    <flow name="datasync-process-api-console">
+        <http:listener config-ref="datasync-process-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+        </http:listener>
+        <apikit:console config-ref="datasync-process-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+
+    <flow name="post:\accounts:application\json:datasync-process-api-config">
+        <logger level="INFO" doc:name="Logger" doc:id="bad7ab83-6778-4ac8-a674-0f37b41bc5f6" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]"/>
+		<set-variable value="#[payload]" doc:name="PAYLOAD" doc:id="9e308e1d-333f-4479-aa51-df665679322d" variableName="payload_persistido"/>
+		<http:request config-ref="HTTP_Request_Salesforce" method="POST" path="/accounts" doc:name="Call Salesforce API">
+            <http:body><![CDATA[#[vars.payload_persistido]]]></http:body>
+        </http:request>
+
+        <logger level="INFO" doc:name="Logger" doc:id="e37624cd-0700-467d-b0fa-60ae6413244d" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]"/>
+		<http:request config-ref="HTTP_Request_Database" method="POST" path="/accounts" doc:name="Call Database API">
+            <http:body><![CDATA[#[vars.payload_persistido]]]></http:body>
+        </http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="e05b5916-56a1-455b-8c07-4e1aa116bf4e" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]"/>
+    </flow>
+
+    <flow name="post:\contacts:application\json:datasync-process-api-config">
+        <logger level="INFO" doc:name="Logger" doc:id="ff967405-c186-4507-aee1-fcb7ce5b4c05" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]"/>
+		<set-variable value="#[payload]" doc:name="PAYLOAD" doc:id="be87c062-2c9b-48d1-9c05-ed38c03c4a4d" variableName="payload_persistido"/>
+		<http:request config-ref="HTTP_Request_Salesforce" method="POST" path="/contacts" doc:name="Call Salesforce API">
+            <http:body><![CDATA[#[vars.payload_persistido]]]></http:body>
+        </http:request>
+
+
+        <logger level="INFO" doc:name="Logger" doc:id="fbbaa6ef-06cc-4db7-8e8d-eab6b750f497" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" />
+		<http:request config-ref="HTTP_Request_Database" method="POST" path="/contacts" doc:name="Call Database API">
+            <http:body><![CDATA[#[vars.payload_persistido]]]></http:body>
+        </http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="f75d799f-a3c6-4859-9310-dbc9d5acf8d1" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" />
+    </flow>
+
+
+    <flow name="post:\customobject:application\json:datasync-process-api-config">
+        <logger level="INFO" doc:name="Logger" doc:id="8de323e1-7878-4725-9209-80d158f38497" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]"/>
+		<set-variable value="#[payload]" doc:name="PAYLOAD" doc:id="4a03b772-30fe-4833-9f07-aca6d41498d4" variableName="payload_persistido"/>
+		<http:request config-ref="HTTP_Request_Salesforce" method="POST" path="/customobject" doc:name="Call Salesforce API">
+            <http:body><![CDATA[#[vars.payload_persistido]]]></http:body>
+        </http:request>
+
+        <logger level="INFO" doc:name="Logger" doc:id="57f57467-ddb5-487a-b994-88add72d504b" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" />
+		<http:request config-ref="HTTP_Request_Database" method="POST" path="/customobject" doc:name="Call Database API">
+            <http:body><![CDATA[#[vars.payload_persistido]]]></http:body>
+        </http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="eb44406c-3ce9-4fcd-a65b-aca5e8e34011" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" />
+    </flow>
+
+
+    <flow name="post:\opportunities:application\json:datasync-process-api-config">
+        <logger level="INFO" doc:name="Logger" doc:id="9a8f9ef5-220b-4a17-bcde-729e908f0b7e" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]"/>
+		<set-variable value="#[payload]" doc:name="PAYLOAD" doc:id="550c09f6-95cb-494c-90db-40d9e0323384" variableName="payload_persistido"/>
+		<http:request config-ref="HTTP_Request_Salesforce" method="POST" path="/opportunities" doc:name="Call Salesforce API">
+            <http:body><![CDATA[#[vars.payload_persistido]]]></http:body>
+        </http:request>
+
+        <logger level="INFO" doc:name="Logger" doc:id="ae23594b-dd5b-465f-ae0c-96095cf7057e" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" />
+		<http:request config-ref="HTTP_Request_Database" method="POST" path="/opportunities" doc:name="Call Database API">
+            <http:body><![CDATA[#[vars.payload_persistido]]]></http:body>
+        </http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="e15de771-4434-4067-9c62-06fd3b37660d" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" />
+    </flow>
+
+</mule>
