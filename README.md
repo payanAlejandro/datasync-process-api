@@ -1,4 +1,4 @@
 # datasync-process-api
 
 
-Sincroniza informacion de manera asincrona entre postgres y Salesforce
+Sincroniza informacion entre postgres y Salesforce
